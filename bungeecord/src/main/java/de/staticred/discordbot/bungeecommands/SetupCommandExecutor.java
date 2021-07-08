@@ -81,8 +81,6 @@ public class SetupCommandExecutor extends Command {
                 ProxiedPlayer p = (ProxiedPlayer) sender;
 
                 if(DBVerifier.getInstance().debugMode) Debugger.debugMessage("Sending test message to bukkit server");
-                DBVerifier.getInstance().bukkitMessageHandler.sendConnectTestToBukkit(p);
-
 
                 if(DBVerifier.getInstance().debugMode) Debugger.debugMessage("Starting async scheduler, waiting 10 seconds");
 

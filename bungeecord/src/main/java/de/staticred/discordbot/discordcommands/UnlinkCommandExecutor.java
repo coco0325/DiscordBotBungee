@@ -1,14 +1,10 @@
 package de.staticred.discordbot.discordcommands;
 
 import de.staticred.discordbot.DBVerifier;
-import de.staticred.discordbot.db.RewardsDAO;
 import de.staticred.discordbot.db.VerifyDAO;
-import de.staticred.discordbot.exceptions.UserAccessException;
 import de.staticred.discordbot.files.ConfigFileManager;
 import de.staticred.discordbot.files.DiscordMessageFileManager;
-import de.staticred.discordbot.files.RewardsFileManager;
 import de.staticred.discordbot.util.Debugger;
-import de.staticred.discordbot.util.manager.RewardManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -16,7 +12,6 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
-import java.awt.*;
 import java.sql.SQLException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -84,26 +79,6 @@ public class UnlinkCommandExecutor {
 
         if(DBVerifier.getInstance().debugMode) Debugger.debugMessage("Unlinking process:");
         if(DBVerifier.getInstance().debugMode) Debugger.debugMessage("Checking if the player is on the network");
-
-        if(player != null) {
-            if(DBVerifier.getInstance().debugMode) Debugger.debugMessage("Player is on the network");
-            if(DBVerifier.getInstance().useSRV) {
-                DBVerifier.getInstance().bukkitMessageHandler.sendPlayerUnlinked(player,m.getId());
-            }
-
-            if(DBVerifier.getInstance().debugMode) Debugger.debugMessage("Executing reward process");
-
-            RewardManager.executeVerifyUnlinkProcess(player);
-        }else{
-
-
-            try {
-                RewardManager.executeVerifyUnlinkProcessBungeeCord(name);
-            } catch (UserAccessException e) {
-                e.printStackTrace();
-            }
-            Debugger.debugMessage("A member unlinked himself from a account which is not present on the network. The player will get unlinked on the next reconnect.");
-        }
 
         try {
             VerifyDAO.INSTANCE.setPlayerAsUnverified(m.getId());

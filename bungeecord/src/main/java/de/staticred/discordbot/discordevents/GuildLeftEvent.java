@@ -1,9 +1,7 @@
 package de.staticred.discordbot.discordevents;
 
 import de.staticred.discordbot.db.VerifyDAO;
-import de.staticred.discordbot.exceptions.UserAccessException;
 import de.staticred.discordbot.util.Debugger;
-import de.staticred.discordbot.util.manager.RewardManager;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -18,13 +16,10 @@ public class GuildLeftEvent extends ListenerAdapter {
         try {
             if(!VerifyDAO.INSTANCE.isDiscordIDInUse(e.getMember().getId())) return;
 
-            RewardManager.executeVerifyUnlinkProcessBungeeCord(VerifyDAO.INSTANCE.getName(m.getId()));
             VerifyDAO.INSTANCE.setPlayerAsUnverified(m.getId());
             VerifyDAO.INSTANCE.removeDiscordIDByDiscordID(m);
         } catch (SQLException ex) {
             ex.printStackTrace();
-        } catch (UserAccessException userAccessException) {
-            userAccessException.printStackTrace();
         }
     }
 }

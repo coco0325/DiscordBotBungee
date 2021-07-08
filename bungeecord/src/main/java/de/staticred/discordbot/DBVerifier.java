@@ -1,12 +1,10 @@
 package de.staticred.discordbot;
 
 import de.staticred.discordbot.api.VerifyAPI;
-import de.staticred.discordbot.bukkitconnectionhandler.BukkitMessageHandler;
 import de.staticred.discordbot.bungeecommands.MCVerifyCommandExecutor;
 import de.staticred.discordbot.bungeecommands.SetupCommandExecutor;
 import de.staticred.discordbot.bungeecommands.dbcommand.DBCommandExecutor;
 import de.staticred.discordbot.bungeecommands.dbgroupcommand.DBGroupCommandExecutor;
-import de.staticred.discordbot.bungeeevents.ChangedBukkitServerEvent;
 import de.staticred.discordbot.bungeeevents.JoinEvent;
 import de.staticred.discordbot.bungeeevents.LeaveEvent;
 import de.staticred.discordbot.bungeeevents.PostLoginEvent;
@@ -41,6 +39,7 @@ import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.UUID;
 
 public class DBVerifier extends Plugin {
@@ -79,9 +78,6 @@ public class DBVerifier extends Plugin {
     //the activity of the bot
     public Activity activity;
 
-    //version from the plugin on the spigot site.
-    public static String spigotVersion;
-
     //the version of the internal file system
     public final static String configVersion = "1.6.1";
     public final static String msgVersion = "1.6.5";
@@ -97,15 +93,6 @@ public class DBVerifier extends Plugin {
 
     //if there is a update on the spigot site
     public boolean isUpdateAvailable;
-
-    //the name of the channel which is used to communicate with the bukkit subserver for a discordsrv connection
-    public static final String PLUGIN_CHANNEL_NAME = "dbv:bungeecord";
-
-    //this object is handling the messaging
-    public BukkitMessageHandler bukkitMessageHandler;
-
-    //this will store the last message which got send from a bukkit
-    public String lastMessageFromBukkit;
 
     public boolean foundSRV = false;
 
@@ -142,13 +129,6 @@ public class DBVerifier extends Plugin {
 
         setuped = SettingsFileManager.INSTANCE.isSetup();
 
-        //instance for handling bukkit incoming messages.
-        bukkitMessageHandler = new BukkitMessageHandler();
-
-        //registering plugin channel
-        getProxy().registerChannel(PLUGIN_CHANNEL_NAME);
-        getProxy().getPluginManager().registerListener(this, bukkitMessageHandler);
-
         pluginVersion = getDescription().getVersion();
 
         //loading databases.
@@ -178,7 +158,7 @@ public class DBVerifier extends Plugin {
 
 
         Metrics metrics = new Metrics(this, 	5843);
-        metrics.addCustomChart(new Metrics.SingleLineChart("groups_registered", () -> DiscordFileManager.INSTANCE.getAllGroups().size()));
+        metrics.addCustomChart(new Metrics.SingleLineChart("groups_registered", () -> Objects.requireNonNull(DiscordFileManager.INSTANCE.getAllGroups()).size()));
 
         if(setuped) {
             int verifed = 0;
@@ -292,7 +272,6 @@ public class DBVerifier extends Plugin {
     public void loadBungeeEvents() {
         getProxy().getPluginManager().registerListener(this,new JoinEvent());
         getProxy().getPluginManager().registerListener(this,new LeaveEvent());
-        getProxy().getPluginManager().registerListener(this,new ChangedBukkitServerEvent());
         getProxy().getPluginManager().registerListener(this,new PostLoginEvent());
     }
 
@@ -343,11 +322,7 @@ public class DBVerifier extends Plugin {
 
     public boolean isUpdateAvailable() {
         new UpdateChecker(this, 72232).getVersion(version -> {
-            if (this.getDescription().getVersion().equalsIgnoreCase(version)) {
-                DBVerifier.getInstance().isUpdateAvailable = false;
-            } else {
-                DBVerifier.getInstance().isUpdateAvailable = true;
-            }
+            DBVerifier.getInstance().isUpdateAvailable = !this.getDescription().getVersion().equalsIgnoreCase(version);
         });
         return false;
     }

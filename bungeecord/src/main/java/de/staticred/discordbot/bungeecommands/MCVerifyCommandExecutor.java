@@ -8,14 +8,11 @@ import de.staticred.discordbot.api.event.UserVerifiedEvent;
 import de.staticred.discordbot.db.VerifyDAO;
 import de.staticred.discordbot.files.BlockedServerFileManager;
 import de.staticred.discordbot.files.ConfigFileManager;
-import de.staticred.discordbot.files.DiscordFileManager;
 import de.staticred.discordbot.files.DiscordMessageFileManager;
 import de.staticred.discordbot.util.Debugger;
 import de.staticred.discordbot.util.MemberManager;
-import de.staticred.discordbot.util.manager.RewardManager;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -70,10 +67,6 @@ public class MCVerifyCommandExecutor extends Command {
                 EventManager.instance.fireEvent(event2);
                 if(event2.isCanceled()) return;
 
-                if(DBVerifier.getInstance().useSRV) {
-                    DBVerifier.getInstance().bukkitMessageHandler.sendPlayerVerified(p,m.getId());
-                }
-
                 VerifyDAO.INSTANCE.setPlayerAsVerified(p.getUniqueId());
                 VerifyDAO.INSTANCE.addDiscordID(p, m);
                 MemberManager.updateRoles(m,p);
@@ -99,8 +92,6 @@ public class MCVerifyCommandExecutor extends Command {
                     p.sendMessage(new TextComponent(DBVerifier.getInstance().getStringFromConfig("MemberIsOwner",true)));
                 }
             }
-
-            RewardManager.executeVerifyRewardProcess(p);
 
             p.sendMessage(new TextComponent(DBVerifier.getInstance().getStringFromConfig("Verified",true)));
             return;
@@ -218,10 +209,6 @@ public class MCVerifyCommandExecutor extends Command {
                 EventManager.instance.fireEvent(event);
                 if(event.isCanceled()) return;
 
-                if(DBVerifier.getInstance().useSRV) {
-                    DBVerifier.getInstance().bukkitMessageHandler.sendPlayerUnlinked(p,VerifyDAO.INSTANCE.getDiscordID(p.getUniqueId()));
-                }
-
                 VerifyDAO.INSTANCE.removeDiscordID(p);
                 VerifyDAO.INSTANCE.setPlayerAsUnVerified(p.getUniqueId());
                 DBVerifier.INSTANCE.removeAllRolesFromMember(m);
@@ -232,8 +219,6 @@ public class MCVerifyCommandExecutor extends Command {
                 e.printStackTrace();
                 return;
             }
-
-            RewardManager.executeVerifyUnlinkProcess(p);
 
 
             p.sendMessage(new TextComponent(DBVerifier.getInstance().getStringFromConfig("UnlinkedYourSelf",true)));
